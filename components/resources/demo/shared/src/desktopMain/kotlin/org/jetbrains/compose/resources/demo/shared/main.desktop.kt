@@ -7,6 +7,7 @@ package org.jetbrains.compose.resources.demo.shared
 
 import androidx.compose.desktop.ui.tooling.preview.Preview
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.text.font.FontFamily
 
 @Composable
 fun MainView() {
@@ -18,3 +19,5 @@ fun MainView() {
 fun Preview() {
     MainView()
 }
+
+actual val OpenSansFontFamily: FontFamily = FontFamily.Default

@@ -14,8 +14,6 @@ kotlin {
     android {
         publishLibraryVariants("release")
     }
-    ios()
-    iosSimulatorArm64()
     js(IR) {
         browser()
     }
@@ -54,14 +52,6 @@ kotlin {
 
             }
         }
-        val iosMain by getting {
-            dependsOn(skikoMain)
-        }
-        val iosTest by getting
-        val iosSimulatorArm64Main by getting
-        iosSimulatorArm64Main.dependsOn(iosMain)
-        val iosSimulatorArm64Test by getting
-        iosSimulatorArm64Test.dependsOn(iosTest)
         val jsMain by getting {
             dependsOn(skikoMain)
         }

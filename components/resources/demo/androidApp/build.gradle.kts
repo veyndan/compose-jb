@@ -9,9 +9,12 @@ dependencies {
     implementation("androidx.activity:activity-compose:1.6.1")
     implementation("androidx.compose.foundation:foundation:1.3.1")
     implementation("androidx.compose.ui:ui:1.3.1")
+    implementation("androidx.core:core-ktx:1.9.0")
+    implementation("com.google.android.material:material:1.8.0-alpha03")
 }
 
 android {
+    namespace = "org.jetbrains.compose.resources.demo"
     buildFeatures {
         compose = true
     }
@@ -20,7 +23,7 @@ android {
     }
     compileSdk = 33
     defaultConfig {
-        applicationId = "me.user.androidApp"
+        applicationId = "com.veyndan.calculator"
         minSdk = 24
         targetSdk = 33
         versionCode = 1

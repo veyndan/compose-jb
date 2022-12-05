@@ -1,6 +1,8 @@
+import org.jetbrains.compose.ExperimentalComposeLibrary
+
 plugins {
     kotlin("multiplatform")
-    kotlin("native.cocoapods")
+    id("app.cash.paparazzi") version "1.1.0"
     id("com.android.library")
     id("org.jetbrains.compose")
 }
@@ -10,10 +12,13 @@ version = "1.0-SNAPSHOT"
 kotlin {
     android()
     jvm("desktop")
-    ios()
-    iosSimulatorArm64()
     js(IR) {
-        browser()
+        browser {
+            commonWebpackConfig {
+                resolveFromModulesFirst = true
+                sourceMaps = true
+            }
+        }
         binaries.executable()
     }
     macosX64 {
@@ -31,35 +36,32 @@ kotlin {
         }
     }
 
-    cocoapods {
-        summary = "Shared code for the sample"
-        homepage = "https://github.com/JetBrains/compose-jb"
-        ios.deploymentTarget = "14.1"
-        podfile = project.file("../iosApp/Podfile")
-        framework {
-            baseName = "shared"
-            isStatic = true
-        }
-        extraSpecAttributes["resources"] = "['src/commonMain/resources/**', 'src/iosMain/resources/**']"
-    }
-
     sourceSets {
         val commonMain by getting {
             dependencies {
                 implementation(compose.ui)
                 implementation(compose.foundation)
+                @OptIn(ExperimentalComposeLibrary::class)
                 implementation(compose.material)
+                // https://github.com/JetBrains/compose-jb/issues/2106#issuecomment-1175423454
+//                implementation(compose.materialIconsExtended)
                 implementation(compose.runtime)
                 implementation(project(":resources:library"))
             }
         }
-        val iosMain by getting
-        val iosTest by getting
-        val iosSimulatorArm64Main by getting {
-            dependsOn(iosMain)
+        val androidMain by getting {
+            dependencies {
+                implementation("com.google.android.material:material:1.8.0-alpha03")
+            }
         }
-        val iosSimulatorArm64Test by getting {
-            dependsOn(iosTest)
+        val androidTest by getting {
+            dependencies {
+                implementation("org.jetbrains.kotlin:kotlin-reflect:1.7.21")
+                implementation("com.google.testparameterinjector:test-parameter-injector:1.10")
+                implementation("androidx.core:core-ktx") {
+                    version { strictly("1.8.0") }
+                }
+            }
         }
         val desktopMain by getting {
             dependencies {
@@ -79,20 +81,11 @@ kotlin {
 }
 
 android {
-    compileSdk = 33
-    sourceSets["main"].manifest.srcFile("src/androidMain/AndroidManifest.xml")
+    namespace = "org.jetbrains.compose.resources.demo.shared"
+    compileSdk = 32
     defaultConfig {
         minSdk = 24
-        targetSdk = 33
-    }
-    compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_1_8
-        targetCompatibility = JavaVersion.VERSION_1_8
-    }
-    sourceSets {
-        named("main") {
-            resources.srcDir("src/commonMain/resources")
-        }
+        targetSdk = 32
     }
 }
 
