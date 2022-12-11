@@ -29,7 +29,17 @@ package org.jetbrains.compose.resources.demo.shared
 //import androidx.compose.material3.TopAppBar
 //import androidx.compose.material3.TopAppBarDefaults
 //import androidx.compose.material3.lightColorScheme
+import androidx.compose.foundation.background
+import androidx.compose.foundation.interaction.FocusInteraction
+import androidx.compose.foundation.interaction.HoverInteraction
+import androidx.compose.foundation.interaction.Interaction
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.interaction.PressInteraction
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.Text
 import androidx.compose.material.TextButton
 import androidx.compose.material.ripple.LocalRippleTheme
@@ -38,6 +48,9 @@ import androidx.compose.material.ripple.RippleTheme
 import androidx.compose.material.ripple.RippleTheme.Companion
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.Stable
+import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.platform.LocalFocusManager
@@ -52,6 +65,9 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.luminance
 //import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontFamily
+import kotlinx.coroutines.channels.BufferOverflow
+import kotlinx.coroutines.flow.MutableSharedFlow
+
 //import androidx.compose.ui.text.font.FontWeight
 //import androidx.compose.ui.unit.Dp
 //import androidx.compose.ui.unit.TextUnit
@@ -121,18 +137,45 @@ private object RippleCustomTheme: RippleTheme {
   }
 }
 
+@Stable
+private class MutableInteractionSourceImpl : MutableInteractionSource {
+  override val interactions = MutableSharedFlow<Interaction>(
+    extraBufferCapacity = 16,
+    onBufferOverflow = BufferOverflow.DROP_OLDEST,
+  )
+
+  private var lastInteraction: Interaction? = null
+
+  override suspend fun emit(interaction: Interaction) {
+    if (interaction is FocusInteraction && lastInteraction is PressInteraction) {
+
+    }
+    when (interaction) {
+      is FocusInteraction -> println("FocusInteraction")
+      is HoverInteraction -> println("HoverInteraction")
+      is PressInteraction -> println("PressInteraction")
+      else -> println("Another Interaction")
+    }
+    interactions.emit(interaction)
+  }
+
+  override fun tryEmit(interaction: Interaction): Boolean {
+    return interactions.tryEmit(interaction)
+  }
+}
 
 @Composable
 internal fun UseResources() {
   Column {
-    CompositionLocalProvider(LocalRippleTheme provides RippleCustomTheme) {
-      TextButton(onClick = {}) {
+//    CompositionLocalProvider(LocalRippleTheme provides RippleCustomTheme) {
+      val interactionSource = remember { MutableInteractionSourceImpl() }
+      TextButton(onClick = {}, interactionSource = interactionSource) {
         Text("Hello")
       }
       TextButton(onClick = {}) {
         Text("World")
       }
-    }
+//    }
   }
 }
 
